@@ -2,6 +2,7 @@ import random
 import string
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import Client, TestCase
 from posts.models import Group, Post
 
@@ -10,6 +11,7 @@ User = get_user_model()
 
 class StaticURLTests(TestCase):
     def setUp(self):
+        cache.clear()
         self.guest_client = Client()
 
     def test_homepage(self):
@@ -26,6 +28,7 @@ class YaTubeURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cache.clear()
         cls.group = Group.objects.create(
             title='Тестовая группа',
             description='Тестовое описание',

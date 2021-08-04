@@ -4,6 +4,7 @@ import tempfile
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -16,6 +17,7 @@ class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cache.clear()
         settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         cls.user = User.objects.create_user(username='Test')
         small_gif = (
@@ -156,6 +158,7 @@ class PaginatorViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cache.clear()
         cls.user = User.objects.create_user(username='Test')
         i = 0
         while i < 13:
@@ -182,6 +185,7 @@ class NewPostGroupTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cache.clear()
         cls.user = User.objects.create_user(username='Test')
         i = 1
         cls.group = []
@@ -249,6 +253,7 @@ class FollowTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cache.clear()
         cls.user_author = User.objects.create_user(username='Author')
         cls.user_follower = User.objects.create_user(username='Follower')
         cls.user_silent = User.objects.create_user(username='Silent')
@@ -306,6 +311,7 @@ class CommentTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cache.clear()
         cls.user_author = User.objects.create_user(username='Author')
         cls.user_commentator = User.objects.create_user(username='Commentator')
         cls.post = Post.objects.create(
@@ -341,6 +347,7 @@ class CacheTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cache.clear()
         cls.user = User.objects.create_user(username='Test')
         cls.post = Post.objects.create(
             text='TeXt' * 10,
