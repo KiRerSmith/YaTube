@@ -278,6 +278,8 @@ class FollowTests(TestCase):
                     kwargs={'username': self.user_author.username})
         )
         self.assertEqual(follows_count + 1, Follow.objects.count())
+        self.assertTrue(self.user_author.following.filter(
+                        user__username=self.user_follower))
 
     def test_authorized_client_can_unfollow(self):
         """Авторизованный пользователь может отписаться."""
@@ -291,6 +293,8 @@ class FollowTests(TestCase):
                     kwargs={'username': self.user_author.username})
         )
         self.assertEqual(follows_count - 1, Follow.objects.count())
+        self.assertFalse(self.user_author.following.filter(
+                         user__username=self.user_follower))
 
     def test_new_post_authorized_client_in_follow_index(self):
         """Новая запись пользователя появляется в ленте тех,
