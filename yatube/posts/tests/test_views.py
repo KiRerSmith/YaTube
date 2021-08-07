@@ -1,6 +1,5 @@
 import shutil
 import tempfile
-import time
 
 from django import forms
 from django.conf import settings
@@ -18,7 +17,6 @@ class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cache.clear()
         settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
         cls.user = User.objects.create_user(username='Test')
         small_gif = (
@@ -52,6 +50,7 @@ class PostPagesTests(TestCase):
         super().tearDownClass()
 
     def setUp(self):
+        cache.clear()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -159,7 +158,6 @@ class PaginatorViewsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cache.clear()
         cls.user = User.objects.create_user(username='Test')
         i = 0
         while i < 13:
@@ -170,6 +168,7 @@ class PaginatorViewsTest(TestCase):
             i += 1
 
     def setUp(self):
+        cache.clear()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -186,7 +185,6 @@ class NewPostGroupTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cache.clear()
         cls.user = User.objects.create_user(username='Test')
         i = 1
         cls.group = []
@@ -205,6 +203,7 @@ class NewPostGroupTests(TestCase):
         )
 
     def setUp(self):
+        cache.clear()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -254,7 +253,6 @@ class FollowTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cache.clear()
         cls.user_author = User.objects.create_user(username='Author')
         cls.user_follower = User.objects.create_user(username='Follower')
         cls.user_silent = User.objects.create_user(username='Silent')
@@ -268,6 +266,7 @@ class FollowTests(TestCase):
         )
 
     def setUp(self):
+        cache.clear()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user_follower)
 
@@ -279,6 +278,7 @@ class FollowTests(TestCase):
                     kwargs={'username': self.user_author.username})
         )
         self.assertEqual(follows_count + 1, Follow.objects.count())
+
     def test_authorized_client_can_unfollow(self):
         """Авторизованный пользователь может отписаться."""
         Follow.objects.create(
@@ -316,7 +316,6 @@ class CommentTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cache.clear()
         cls.user_author = User.objects.create_user(username='Author')
         cls.user_commentator = User.objects.create_user(username='Commentator')
         cls.post = Post.objects.create(
@@ -325,6 +324,7 @@ class CommentTests(TestCase):
         )
 
     def setUp(self):
+        cache.clear()
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user_commentator)
@@ -352,9 +352,9 @@ class CacheTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cache.clear()
 
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username='Test')
         self.post = Post.objects.create(
             text='TeXt' * 10,
@@ -365,15 +365,13 @@ class CacheTests(TestCase):
 
     def test_cache(self):
         response = self.authorized_client.get(reverse('index'))
-        post_count = len(response.context['page'])
+        post_content = response.content
         Post.objects.create(
             text='Second' * 10,
             author=self.user
         )
-        time.sleep(20)
-        # Ошибка возникает далее
         response = self.authorized_client.get(reverse('index'))
-        self.assertEqual(post_count, len(response.context['page']))
+        self.assertEqual(post_content, response.content)
         cache.clear()
         response = self.authorized_client.get(reverse('index'))
-        self.assertEqual(post_count + 1, len(response.context['page']))
+        self.assertNotEqual(post_content, response.content)
