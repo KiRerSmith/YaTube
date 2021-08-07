@@ -1,5 +1,6 @@
 import shutil
 import tempfile
+import time
 
 from django import forms
 from django.conf import settings
@@ -270,31 +271,35 @@ class FollowTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user_follower)
 
-    def test_authorized_client_can_follow_unfollow(self):
-        """Авторизованный пользователь может подписаться и отписаться."""
+    def test_authorized_client_can_follow(self):
+        """Авторизованный пользователь может подписаться."""
         follows_count = Follow.objects.count()
-        # Подписывается
         self.authorized_client.get(
             reverse('profile_follow',
                     kwargs={'username': self.user_author.username})
         )
         self.assertEqual(follows_count + 1, Follow.objects.count())
-        # Отписывается
+    def test_authorized_client_can_unfollow(self):
+        """Авторизованный пользователь может отписаться."""
+        Follow.objects.create(
+            user=self.user_follower,
+            author=self.user_author
+        )
+        follows_count = Follow.objects.count()
         self.authorized_client.get(
             reverse('profile_unfollow',
                     kwargs={'username': self.user_author.username})
         )
-        self.assertEqual(follows_count, Follow.objects.count())
+        self.assertEqual(follows_count - 1, Follow.objects.count())
 
     def test_new_post_authorized_client_in_follow_index(self):
         """Новая запись пользователя появляется в ленте тех,
         кто на него подписан и не появляется в ленте тех,
         кто не подписан на него.
         """
-        # Подписывается
-        self.authorized_client.get(
-            reverse('profile_follow',
-                    kwargs={'username': self.user_author.username})
+        Follow.objects.create(
+            user=self.user_follower,
+            author=self.user_author
         )
         response = self.authorized_client.get(reverse('follow_index'))
         object = response.context['page'][0]
@@ -348,13 +353,13 @@ class CacheTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cache.clear()
-        cls.user = User.objects.create_user(username='Test')
-        cls.post = Post.objects.create(
-            text='TeXt' * 10,
-            author=cls.user
-        )
 
     def setUp(self):
+        self.user = User.objects.create_user(username='Test')
+        self.post = Post.objects.create(
+            text='TeXt' * 10,
+            author=self.user
+        )
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -365,5 +370,10 @@ class CacheTests(TestCase):
             text='Second' * 10,
             author=self.user
         )
+        time.sleep(20)
+        # Ошибка возникает далее
         response = self.authorized_client.get(reverse('index'))
         self.assertEqual(post_count, len(response.context['page']))
+        cache.clear()
+        response = self.authorized_client.get(reverse('index'))
+        self.assertEqual(post_count + 1, len(response.context['page']))

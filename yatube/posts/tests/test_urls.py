@@ -28,7 +28,6 @@ class YaTubeURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cache.clear()
         cls.group = Group.objects.create(
             title='Тестовая группа',
             description='Тестовое описание',
@@ -36,6 +35,7 @@ class YaTubeURLTests(TestCase):
         )
 
     def setUp(self):
+        cache.clear()
         self.guest_client = Client()
         self.user = User.objects.create_user(username='TestUser')
         self.authorized_client = Client()

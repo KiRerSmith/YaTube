@@ -23,7 +23,7 @@
               Записей: {{ author.posts.count }}
             </div>
           </li>
-          {% if not self_follower %}
+          {% if not request.user == author %}
           <li class="list-group-item">
             {% if following %}
               <a
