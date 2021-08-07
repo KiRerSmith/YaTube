@@ -52,8 +52,7 @@ def post_view(request, username, post_id):
     post = get_object_or_404(Post, id=post_id, author__username=username)
     author = post.author
     followers_statics = {
-        'followers_count': author.following.filter(
-            author__username=username).count(),
+        'followers_count': author.following.all().count(),
         'follows_count': author.follower.all().count(),
     }
     comments = post.comments.all()
