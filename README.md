@@ -1,3 +1,48 @@
-# hw05_final
+# YaTube
+##### Социальная сеть для публикации дневников, с возможностью подписок и комментирования.  
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+### Действующий пример:
+http://kirer.pythonanywhere.com/
+
+### Запустить проекта:
+Склонировать репозиторий, перейти в него при помощи команды:
+
+```
+git clone https://github.com/KiRerSmith/YaTube
+```
+
+```
+cd yatube
+```
+
+Cоздать и активировать виртуальное окружение:
+
+```
+python -m venv venv
+```
+
+```
+source venv/Scripts/activate
+```
+
+Установить зависимости из файла requirements.txt:
+
+```
+python -m pip install --upgrade pip
+```
+
+```
+pip install -r requirements.txt
+```
+
+Выполнить миграции:
+
+```
+python manage.py migrate
+```
+
+Запустить проект:
+
+```
+python manage.py runserver
+```
